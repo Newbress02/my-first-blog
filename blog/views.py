@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from .models import Post
+from .models import Post, Photo
 from .forms import PostForm
 
 
@@ -40,3 +40,21 @@ def post_edit(request, pk):
     else:
         form = PostForm(instance=post)
     return render(request, 'blog/post_edit.html', {'form':form})
+
+def create(request):
+    if(request.method == 'POST'):
+        post = Post()
+        Post.title = request.POST['title']
+        post.text = request.POST['text']
+        post.created_date = timezone.now()
+        post.author = request.author
+        post.save()
+
+        for img in request.FILES.getlist('imgs'):
+            photo = Photo()
+            photo.post = post
+            photo.image = img
+            photo.save()
+        return  redirect('/detail/' + str(post.id))
+    else:
+        return render(request, 'new.html')
